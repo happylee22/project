@@ -2,12 +2,26 @@ import { SearchyBar } from "@/component/tabIcons/searchyBar";
 import { colors } from "@/constants";
 import { icons } from "@/constants/icons";
 import { images } from "@/constants/images";
+import { useFetch } from "@/hooks/useFetch";
+import { fetchMovies } from "@/services/api";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { ScrollView, StyleSheet, View } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 export default function Index() {
   const router = useRouter();
+  const {
+    data: movies,
+    loading: movieloading,
+    error: movieError,
+  } = useFetch(() => fetchMovies({ query: "" }));
 
   return (
     <View style={styles.container}>
@@ -18,12 +32,31 @@ export default function Index() {
         contentContainerStyle={{ minHeight: "100%", paddingBottom: 10 }}
       >
         <Image source={icons.logo} style={styles.smallImage} />
-        <View style={{ flex: 1, marginTop: 20 }}>
-          <SearchyBar
-            onPress={() => router.push("/search")}
-            placeholder="Search for a movie"
+        {movieloading ? (
+          <ActivityIndicator
+            size="large"
+            color="#0000ff"
+            style={{ marginTop: 40, alignSelf: "center" }}
           />
-        </View>
+        ) : movieError ? (
+          <Text> Error: {movieError?.message}</Text>
+        ) : (
+          <View style={{ flex: 1, marginTop: 20 }}>
+            <SearchyBar
+              onPress={() => router.push("/search")}
+              placeholder="Search for a movie"
+            />
+            <>
+              <Text style={styles.latestMoviesText}>Latest Movies</Text>
+              <FlatList
+                data={movies}
+                renderItem={({ item }) => (
+                  <Text style={styles.latestMoviesText}> {item.title}</Text>
+                )}
+              />
+            </>
+          </View>
+        )}
       </ScrollView>
     </View>
   );
@@ -49,5 +82,13 @@ const styles = StyleSheet.create({
     marginTop: 80,
     marginBottom: 20,
     marginHorizontal: "auto",
+  },
+  latestMoviesText: {
+    color: "white",
+
+    fontWeight: "bold",
+    fontSize: 16,
+    marginTop: 24,
+    marginBottom: 12,
   },
 });
