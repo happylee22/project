@@ -1,3 +1,4 @@
+import { MovieCard } from "@/component/tabIcons/movieCard";
 import { SearchyBar } from "@/component/tabIcons/searchyBar";
 import { colors } from "@/constants";
 import { icons } from "@/constants/icons";
@@ -50,9 +51,16 @@ export default function Index() {
               <Text style={styles.latestMoviesText}>Latest Movies</Text>
               <FlatList
                 data={movies}
-                renderItem={({ item }) => (
-                  <Text style={styles.latestMoviesText}> {item.title}</Text>
-                )}
+                renderItem={({ item }) => <MovieCard {...item} />}
+                keyExtractor={(item) => item.id.toString()}
+                numColumns={3}
+                columnWrapperStyle={{
+                  justifyContent: "center",
+                  gap: 16,
+                  marginVertical: 16,
+                }}
+                style={styles.flatList}
+                scrollEnabled={false}
               />
             </>
           </View>
@@ -90,5 +98,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 24,
     marginBottom: 12,
+  },
+  flatList: {
+    marginTop: 10,
+    paddingBottom: 128,
   },
 });
