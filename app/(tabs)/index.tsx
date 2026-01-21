@@ -5,6 +5,7 @@ import { icons } from "@/constants/icons";
 import { images } from "@/constants/images";
 import { useFetch } from "@/hooks/useFetch";
 import { fetchMovies } from "@/services/api";
+import { getTrendingMovies } from "@/services/appwrite";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import {
@@ -18,6 +19,11 @@ import {
 
 export default function Index() {
   const router = useRouter();
+  const {
+    data: trendingMovies,
+    loading: trendingLoading,
+    error: trendingError,
+  } = useFetch(getTrendingMovies);
   const {
     data: movies,
     loading: movieloading,
@@ -33,22 +39,45 @@ export default function Index() {
         contentContainerStyle={{ minHeight: "100%", paddingBottom: 10 }}
       >
         <Image source={icons.logo} style={styles.smallImage} />
-        {movieloading ? (
+        {movieloading || trendingLoading ? (
           <ActivityIndicator
             size="large"
             color="#0000ff"
             style={{ marginTop: 40, alignSelf: "center" }}
           />
-        ) : movieError ? (
-          <Text> Error: {movieError?.message}</Text>
+        ) : movieError || trendingError ? (
+          <Text> Error: {movieError?.message || trendingError?.message}</Text>
         ) : (
           <View style={{ flex: 1, marginTop: 20 }}>
             <SearchyBar
               onPress={() => router.push("/search")}
               placeholder="Search for a movie"
             />
+            {trendingMovies && (
+              <View style={{ marginTop: 40 }}>
+                <Text
+                  style={{
+                    fontSize: 20,
+                    fontWeight: "500",
+                    color: "white",
+                    marginBottom: 13,
+                  }}
+                >
+                  Trending Movies{" "}
+                </Text>
+              </View>
+            )}
             <>
               <Text style={styles.latestMoviesText}>Latest Movies</Text>
+              <FlatList
+                data={trendingMovies}
+                renderItem={({ item, index }) => (
+                  <Text style={{ color: "white", fontSize: 14 }}>
+                    {item.title}
+                  </Text>
+                )}
+              />
+
               <FlatList
                 data={movies}
                 renderItem={({ item }) => <MovieCard {...item} />}
